@@ -1,5 +1,5 @@
 use crossterm::event::{self, Event, KeyCode, KeyEvent, KeyEventKind};
-use ratatui::{DefaultTerminal, Frame, layout::Rect, style::Color, symbols, widgets::{Block, Paragraph, Widget, canvas::{Canvas, Line, Map, MapResolution, Rectangle}}};
+use ratatui::{DefaultTerminal, Frame, layout::{Layout, Rect}, style::Color, symbols, widgets::{Block, Paragraph, Widget, canvas::{Canvas, Line, Map, MapResolution, Rectangle}}};
 
 
 enum MyEvent {
@@ -45,7 +45,7 @@ fn main() -> std::io::Result<()> {
 fn run_app(terminal: &mut DefaultTerminal) -> std::io::Result<()> {
     loop {
         terminal.clear()?;
-        terminal.draw(|frame| frame.render_widget(draw_grid(120,60), frame.area().resize(size)))?;
+        terminal.draw(|frame| frame.render_widget(draw_grid(120,60), frame.area()))?;
         if let Some(my_event) = handle_events()? {
             match my_event {
                 MyEvent::AppQuit => std::process::exit(0),
@@ -70,6 +70,10 @@ fn handle_events() -> std::io::Result<Option<MyEvent>> {
     Ok(None)
 }
 
+fn render(frame: &mut Frame) {
+
+}
+
 fn draw_grid(width: i32, height: i32) -> impl Widget {
     Canvas::default()
     .marker(symbols::Marker::Braille)
@@ -77,12 +81,9 @@ fn draw_grid(width: i32, height: i32) -> impl Widget {
     .x_bounds([0.0, 80.0])
     .y_bounds([0.0, 40.0])
     .paint(move |ctx| {
-        for y in (0..=height).step_by(2) {
-        ctx.draw(&Line::new(0.0, y as f64, 120.0, y as f64, Color::DarkGray));
-        }
-
-        for x in (0..=width).step_by(5) {
-            ctx.draw(&Line::new(x as f64, 0.0, x as f64, 120.0, Color::DarkGray));
+        for y in 0..height {
+            let line = String::from("■ ").repeat((width / 2) as usize);
+            ctx.print(0.0, y as f64, line);
         }
     })
 }
